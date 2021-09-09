@@ -1,12 +1,19 @@
 import qs from "qs";
 import nock, { Scope } from "nock";
 
-import { NockClientRequest, ViewFn, DeleteViewFn, PostViewFn } from "./types";
+import {
+  NockClientRequest,
+  ViewFn,
+  DeleteViewFn,
+  PostViewFn,
+  PutViewFn,
+} from "./types";
 import { MockInstance } from "./instance";
 import { decodeTokenAndAttachUser } from "./middlewares";
 import {
   listCertificates,
   getUser,
+  putUser,
   deleteUser,
   getUserInfo,
   createToken,
@@ -24,6 +31,7 @@ export interface Mock {
 export interface MockOptions {
   listCertificatesView?: ViewFn;
   getUserView?: ViewFn;
+  putUserView?: PutViewFn;
   deleteUserView?: DeleteViewFn;
   getUserInfoView?: ViewFn;
   listUsersView?: ViewFn;
@@ -73,6 +81,18 @@ const activateMock = (instance: MockInstance, options?: MockOptions): Mock => {
       }
 
       return getUser(instance, this.req);
+    })
+    .put(new RegExp(`/admin/realms/${realm}/users/(.+)`))
+    .reply(async function(uri, body) {
+      const decodedBody = decodeBody(this.req, body);
+
+      await decodeTokenAndAttachUser(instance, this.req);
+
+      if (options && options.putUserView) {
+        return options.putUserView(instance, this.req, decodedBody);
+      }
+
+      return putUser(instance, this.req, decodedBody);
     })
     .delete(new RegExp(`/admin/realms/${realm}/users/(.+)`))
     .reply(async function() {

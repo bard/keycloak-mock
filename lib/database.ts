@@ -178,6 +178,37 @@ class MockDatabase {
   }
 
   /**
+   * Updates a user by ID.
+   */
+  updateUserByID(
+    id: string,
+    options: Omit<CreateMockUserOptions, "id">
+  ): void {
+    const { credentials: credentialChanges, ...profileChanges } = options;
+    const newCredentials = credentialChanges
+      ? {
+          credentials: credentialChanges.map(({ type, value }) => ({
+            type: type || MockUserCredentialType.PASSWORD,
+            value,
+          })),
+        }
+      : {};
+
+    this.users = this.users.map((storedUser) =>
+      storedUser.profile.id !== id
+        ? storedUser
+        : {
+            ...storedUser,
+            profile: {
+              ...storedUser.profile,
+              ...profileChanges,
+            },
+            ...newCredentials,
+          }
+    );
+  }
+
+  /**
    * Creates a new user and returns the profile of the newly created user.
    */
   createUser(options?: CreateMockUserOptions): MockUser {

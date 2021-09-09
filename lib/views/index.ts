@@ -1,5 +1,6 @@
 export { default as listCertificates } from "./listCertificates";
 export { default as getUser } from "./getUser";
+export { default as putUser } from "./putUser";
 export { default as deleteUser } from "./deleteUser";
 export { default as getUserInfo } from "./getUserInfo";
 export { default as listUsers } from "./listUsers";

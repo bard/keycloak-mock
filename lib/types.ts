@@ -14,6 +14,12 @@ export type ViewFn = (
   request: NockClientRequest
 ) => NockClientResponse;
 
+export type PutViewFn = (
+  instance: MockInstance,
+  request: NockClientRequest,
+  body: Record<string, any>
+) => NockClientResponse;
+
 export type DeleteViewFn = (
   instance: MockInstance,
   request: NockClientRequest
