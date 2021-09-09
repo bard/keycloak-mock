@@ -21,13 +21,16 @@ const createToken: PostViewFn = (instance, request, body) => {
 
     user = instance.database.matchForPasswordGrant(username, password);
   } else if (grantType === "client_credentials") {
-    const { username, password, client_secret: clientSecret } = body;
+    const clientSecret = request.headers.authorization?.startsWith('Basic ') ?
+      Buffer.from(request.headers['authorization'].split(' ')[1],'base64').toString('ascii').split(':')[1] :
+      body.client_secret || body.password
+    const username = body.username    
 
     if (!clientID && !username) {
       return [400, "Bad request"];
     }
 
-    if (!clientSecret && !password) {
+    if (!clientSecret) {
       return [400, "Bad request"];
     }
 
@@ -35,7 +38,7 @@ const createToken: PostViewFn = (instance, request, body) => {
     // username and password, hence the fallback
     user = instance.database.matchForClientGrant(
       clientID || username,
-      clientSecret || password
+      clientSecret
     );
   } else {
     return [400, "Bad request"];
